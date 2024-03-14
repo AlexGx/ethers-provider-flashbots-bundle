@@ -75,6 +75,13 @@ export interface FlashbotsPrivateTransactionResponse {
   receipts: () => Promise<Array<TransactionReceipt>>
 }
 
+export interface BundleBroadcastResponse {
+  bundleTransactions: Array<TransactionAccountNonce>
+  wait: () => Promise<FlashbotsBundleResolution>
+  receipts: () => Promise<Array<TransactionReceipt>>
+  bundleHashes: Array<string>  
+}
+
 export interface TransactionSimulationBase {
   txHash: string
   gasUsed: number
@@ -120,6 +127,8 @@ export interface SimulationResponseSuccess {
 export type SimulationResponse = SimulationResponseSuccess | RelayResponseError
 
 export type FlashbotsTransaction = FlashbotsTransactionResponse | RelayResponseError
+
+export type BundleBroadcast = BundleBroadcastResponse | RelayResponseError
 
 export type FlashbotsPrivateTransaction = FlashbotsPrivateTransactionResponse | RelayResponseError
 
@@ -241,7 +250,7 @@ const TIMEOUT_MS = 5 * 60 * 1000
 
 export class FlashbotsBundleProvider extends AbstractProvider {
   private genericProvider: Provider
-  private authSigner: Signer
+  protected authSigner: Signer
 
   #connect: FetchRequest
   #nextId: number
@@ -609,7 +618,7 @@ export class FlashbotsBundleProvider extends AbstractProvider {
    * @param targetBlockNumber block number to check for bundle inclusion
    * @param timeout ms
    */
-  private waitForBundleInclusion(transactionAccountNonces: Array<TransactionAccountNonce>, targetBlockNumber: number, timeout: number) {
+  protected waitForBundleInclusion(transactionAccountNonces: Array<TransactionAccountNonce>, targetBlockNumber: number, timeout: number) {
     return new Promise<FlashbotsBundleResolution>((resolve, reject) => {
       let timer: NodeJS.Timeout | null = null
       let done = false
@@ -1105,7 +1114,7 @@ export class FlashbotsBundleProvider extends AbstractProvider {
     return resp.bodyJson
   }
 
-  private async fetchReceipts(bundledTransactions: Array<TransactionAccountNonce>): Promise<Array<TransactionReceipt>> {
+  protected async fetchReceipts(bundledTransactions: Array<TransactionAccountNonce>): Promise<Array<TransactionReceipt>> {
     const receipts = await Promise.all(
       bundledTransactions.map((bundledTransaction) => this.genericProvider.getTransactionReceipt(bundledTransaction.hash))
     )
@@ -1114,7 +1123,7 @@ export class FlashbotsBundleProvider extends AbstractProvider {
     })
   }
 
-  private prepareRelayRequest(
+  protected prepareRelayRequest(
     method:
       | 'eth_callBundle'
       | 'eth_cancelBundle'

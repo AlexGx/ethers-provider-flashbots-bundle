@@ -75,13 +75,6 @@ export interface FlashbotsPrivateTransactionResponse {
   receipts: () => Promise<Array<TransactionReceipt>>
 }
 
-export interface BundleBroadcastResponse {
-  bundleTransactions: Array<TransactionAccountNonce>
-  wait: () => Promise<FlashbotsBundleResolution>
-  receipts: () => Promise<Array<TransactionReceipt>>
-  bundleHashes: Array<string>  
-}
-
 export interface TransactionSimulationBase {
   txHash: string
   gasUsed: number
@@ -127,8 +120,6 @@ export interface SimulationResponseSuccess {
 export type SimulationResponse = SimulationResponseSuccess | RelayResponseError
 
 export type FlashbotsTransaction = FlashbotsTransactionResponse | RelayResponseError
-
-export type BundleBroadcast = BundleBroadcastResponse | RelayResponseError
 
 export type FlashbotsPrivateTransaction = FlashbotsPrivateTransactionResponse | RelayResponseError
 
@@ -1145,6 +1136,15 @@ export class FlashbotsBundleProvider extends AbstractProvider {
   }
 }
 
+export type BundleBroadcast = BundleBroadcastResponse | RelayResponseError
+
+export interface BundleBroadcastResponse {
+  bundleTransactions: Array<TransactionAccountNonce>
+  wait: () => Promise<FlashbotsBundleResolution>
+  receipts: () => Promise<Array<TransactionReceipt>>
+  bundleHashes: Array<string>
+}
+
 export type ConnectionEndpoint = string | FetchRequest
 
 export class BuilderBroadcaster extends FlashbotsBundleProvider {
@@ -1268,7 +1268,7 @@ export class BuilderBroadcaster extends FlashbotsBundleProvider {
 
   private async requestBroadcast(body: string) {
     const signature: string = `${await this.authSigner.getAddress()}:${await this.authSigner.signMessage(id(body))}`
-    const responseHandles = Array<Promise<any>>(); // instead of <any> must be response?
+    const responseHandles = Array<Promise<any>>(); // @review: instead of <any> must be response?
     for (let connectionInfo of this.connectionInfoArr) {
       // TODO: wrap with info about builder
       const request = connectionInfo.clone(); 

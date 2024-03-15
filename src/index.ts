@@ -1136,6 +1136,7 @@ export class FlashbotsBundleProvider extends AbstractProvider {
   }
 }
 
+// start
 export type BundleBroadcast = BundleBroadcastResponse | RelayResponseError
 
 export interface BundleBroadcastResponse {
@@ -1247,9 +1248,8 @@ export class BuilderBroadcaster extends FlashbotsBundleProvider {
       wait: () => super.waitForBundleInclusion(bundleTransactions, targetBlockNumber, TIMEOUT_MS),
       receipts: () => super.fetchReceipts(bundleTransactions),
       bundleHashes: bundleHashes
-    }    
-
-  }  
+    }
+  }
 
   // TODO: @cleanup
   /*private async requestExample(body: string) {
